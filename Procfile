@@ -1,1 +1,1 @@
-web: gunicorn3 -w 4 -b localhost:8080 server:app
+web: gunicorn -w 4 -b localhost:8080 server:app
