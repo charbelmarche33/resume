@@ -1,7 +1,7 @@
 # External imports
 import os
 import json
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, jsonify
 from flask_mail import Mail
 
 # Internal imports
@@ -38,10 +38,10 @@ def sendMsg():
             email = data["email"]
             message = data["message"]
             hlp.send_message(mail, subject, name, email, message)
-            return {"status": "success"}
+            return jsonify({"status": "success"})
         except Exception as e:
             print(e)
-            return {"status": "error"}
+            return jsonify({"status": "error"})
 
 
 @app.errorhandler(404)

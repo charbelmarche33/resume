@@ -229,31 +229,53 @@
 })();
 
 
-function submitForm() {
-  var form = document.getElementById('contact-form');
-  form.classList.add('loading');
-  // Send a post to the /send-message endpoint with form data
-  fetch('/send-message', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      name: form.name.value,
-      email: form.email.value,
-      subject: form.subject.value,
-      message: form.message.value
+let forms = document.querySelectorAll('.php-email-form');
+forms.forEach(function (e) {
+  e.addEventListener('submit', function (event) {
+    event.preventDefault();
+    e.classList.add('loading');
+    e.querySelector('.loading').classList.add('d-block');
+    // Send a post to the /send-message endpoint with form data
+    fetch('/send-message', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: e.name.value,
+        email: e.email.value,
+        subject: e.subject.value,
+        message: e.message.value
+      })
     })
-  })
-    // If the response is ok, show a success message
-    .then(response => {
-      form.classList.remove('loading');
-      if (response.ok && response['status'] === 'success') {
-        form.reset();
-        form.classList.add('sent-message');
-      } else {
-        form.classList.add('error-message');
-        form.querySelector('.error-message').innerHTML = "Something went wrong. Please try again later.";
-      }
-    })
-}
+      // If the response is ok, show a success message
+      .then(response => {
+        e.classList.remove('loading');
+        e.querySelector('.loading').classList.remove('d-block');
+        if (response.ok) {
+          console.log("Success: ", response);
+          e.reset();
+        } else {
+          console.log("Error: ", response);
+          e.classList.add('error-message');
+          e.querySelector('.error-message').innerHTML = "Something went wrong locally. Please try again later.";
+          e.querySelector('.error-message').classList.add('d-block');
+        }
+        return response.json();
+      }).then(function (json) {
+        if (json.status == "success") {
+          console.error(json.error);
+          e.classList.add('sent-message');
+          e.querySelector('.sent-message').innerHTML = "Your message has been sent. Thank you!";
+          e.querySelector('.sent-message').classList.add('d-block');
+        }
+        else {
+          console.error(json.error);
+          e.classList.add('error-message');
+          e.querySelector('.error-message').innerHTML = "Something went wrong on the server. Please try again later.";
+          e.querySelector('.error-message').classList.add('d-block');
+        }
+      })
+
+  });
+});

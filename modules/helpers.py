@@ -18,7 +18,7 @@ def send_message(mail, subject, name, email, message):
     # Set up the basis of the email to send
     msg = Message(
         subject=f"Form on charbelmarche.com {subject}",
-        sender=(SENDING_EMAIL, name),
+        sender=(name, SENDING_EMAIL),
         recipients=RECIPIENT_EMAILS,
         charset="utf-8",
         reply_to=email,
