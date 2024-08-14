@@ -1,27 +1,52 @@
+# External imports
 import os
-from flask import (
-    Flask,
-    render_template,
-)
+import json
+from flask import Flask, render_template, request, redirect
+from flask_mail import Mail
 
-# from flask_mail import Mail, Message
+# Internal imports
+from modules import helpers as hlp
+from lib.consts import SENDING_EMAIL
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_KEY")
 
 app.config.update(
-    MAIL_SERVER="mail.privateemail.com",
-    MAIL_USERNAME="info@novacards.ai",
-    MAIL_PASSWORD=os.environ.get("EMAILPWD"),
+    MAIL_SERVER="smtp.gmail.com",
+    MAIL_USERNAME=SENDING_EMAIL,
+    MAIL_PASSWORD=os.environ.get("EMAIL_PWD"),
     MAIL_PORT=465,
     MAIL_USE_SSL=True,
     MAIL_USE_TSL=False,
 )
 
+mail = Mail(app)
+
 
 @app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
+
+
+@app.route("/send-message", methods=["POST"])
+def sendMsg():
+    if request.method == "POST":
+        try:
+            data = json.loads(request.data)
+            subject = data["subject"]
+            name = data["name"]
+            email = data["email"]
+            message = data["message"]
+            hlp.send_message(mail, subject, name, email, message)
+            return {"status": "success"}
+        except Exception as e:
+            print(e)
+            return {"status": "error"}
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect("/", code=303)
 
 
 # Run the app
